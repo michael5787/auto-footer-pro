@@ -237,7 +237,6 @@ export type Database = {
       resources: {
         Row: {
           category: Database["public"]["Enums"]["resource_category"]
-          class_id: string | null
           created_at: string
           description: string | null
           file_name: string
@@ -252,7 +251,6 @@ export type Database = {
         }
         Insert: {
           category: Database["public"]["Enums"]["resource_category"]
-          class_id?: string | null
           created_at?: string
           description?: string | null
           file_name: string
@@ -267,7 +265,6 @@ export type Database = {
         }
         Update: {
           category?: Database["public"]["Enums"]["resource_category"]
-          class_id?: string | null
           created_at?: string
           description?: string | null
           file_name?: string
@@ -281,13 +278,6 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "resources_class_id_fkey"
-            columns: ["class_id"]
-            isOneToOne: false
-            referencedRelation: "classes"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "resources_level_id_fkey"
             columns: ["level_id"]
