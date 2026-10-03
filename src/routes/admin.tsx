@@ -4,18 +4,22 @@ import { UserRound } from "lucide-react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { SpaceAuth, Wordmark } from "@/components/SpaceAuth";
 import { LevelsPanel } from "@/components/admin/LevelsPanel";
+import { ChaptersPanel } from "@/components/admin/ChaptersPanel";
 import { ClassesPanel } from "@/components/admin/ClassesPanel";
 import { UsersPanel } from "@/components/admin/UsersPanel";
 import type { Database } from "@/integrations/supabase/types";
 import { SPACE_LABEL, STATUS_LABEL, type SpaceKey } from "@/lib/spaces";
+import { externalAdminUrl } from "@/lib/admin-host";
+
 
 type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
-type Tab = "accounts" | "users" | "levels" | "classes";
+type Tab = "accounts" | "users" | "levels" | "chapters" | "classes";
 
 const TABS: { key: Tab; label: string }[] = [
   { key: "accounts", label: "المصادقة" },
   { key: "users", label: "المستخدمون" },
   { key: "levels", label: "المستويات" },
+  { key: "chapters", label: "البرنامج" },
   { key: "classes", label: "الأقسام" },
 ];
 
@@ -36,6 +40,25 @@ export const Route = createFileRoute("/admin")({
 });
 
 function Page() {
+  const [redirecting, setRedirecting] = useState(false);
+
+  useEffect(() => {
+    const url = externalAdminUrl(window.location.pathname + window.location.search);
+    if (!url) return;
+    setRedirecting(true);
+    window.location.replace(url);
+  }, []);
+
+  if (redirecting) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-canvas px-6">
+        <p className="text-center text-sm text-muted-foreground">
+          جارٍ تحويلك إلى فضاء الإدارة…
+        </p>
+      </div>
+    );
+  }
+
   return (
     <SpaceAuth space="admin">
       {({ session, profile, client, signOut }) => (
@@ -49,6 +72,7 @@ function Page() {
     </SpaceAuth>
   );
 }
+
 
 function AdminDashboard({
   name,
@@ -101,6 +125,7 @@ function AdminDashboard({
         {tab === "accounts" ? <AccountsPanel client={client} /> : null}
         {tab === "users" ? <UsersPanel client={client} /> : null}
         {tab === "levels" ? <LevelsPanel client={client} /> : null}
+        {tab === "chapters" ? <ChaptersPanel client={client} /> : null}
         {tab === "classes" ? <ClassesPanel client={client} /> : null}
       </main>
     </div>

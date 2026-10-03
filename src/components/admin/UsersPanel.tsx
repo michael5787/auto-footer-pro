@@ -4,7 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 import { SPACE_LABEL, STATUS_LABEL, type SpaceKey } from "@/lib/spaces";
-import { setUserPassword } from "@/lib/admin-users.functions";
+import { setUserPassword, setUserEmail, confirmApprovedUserEmail } from "@/lib/admin-users.functions";
 import { PasswordField } from "@/components/PasswordField";
 
 type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
@@ -77,6 +77,15 @@ export function UsersPanel({ client }: { client: SupabaseClient<Database> }) {
           .from("teacher_classes")
           .insert(toAdd.map((class_id) => ({ teacher_id: editing.id, class_id })));
         syncErr = e ?? syncErr;
+      }
+    }
+    if (!err && patch.status === "approved") {
+      // Approving an account must also make it usable: clear any pending
+      // email-confirmation gate so the user can sign in right away.
+      try {
+        await confirmApprovedUserEmail({ data: { email: editing.email } });
+      } catch {
+        /* non blocking */
       }
     }
     if (err || syncErr) setError("تعذّر حفظ المستخدم.");
@@ -236,7 +245,23 @@ function UserEditor({
   const [newPassword, setNewPassword] = useState("");
   const [pwBusy, setPwBusy] = useState(false);
   const [pwMsg, setPwMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const [newEmail, setNewEmail] = useState(row.email);
+  const [emailBusy, setEmailBusy] = useState(false);
+  const [emailMsg, setEmailMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const updatePasswordFn = useServerFn(setUserPassword);
+  const updateEmailFn = useServerFn(setUserEmail);
+
+  const failText = (err: unknown, action: string) => {
+    const msg = err instanceof Error ? err.message : "";
+    if (/Forbidden/i.test(msg)) return `${action}: هذا الحساب لا يملك صلاحيات المشرف العام.`;
+    if (/Unauthorized/i.test(msg)) return `${action}: انتهت جلستك، أعد تسجيل الدخول.`;
+    if (/weak|easy to guess/i.test(msg))
+      return `${action}: كلمة المرور ضعيفة جداً، اختر كلمة مرور أقوى.`;
+    if (/should be at least|Password should be/i.test(msg))
+      return `${action}: كلمة المرور قصيرة جداً (6 أحرف على الأقل).`;
+    return `${action}${msg ? ` (${msg})` : ""}.`;
+  };
+
 
   const updatePassword = async () => {
     if (newPassword.length < 6) return;
@@ -246,10 +271,24 @@ function UserEditor({
       await updatePasswordFn({ data: { userId: row.id, password: newPassword } });
       setNewPassword("");
       setPwMsg({ ok: true, text: "تم تحديث كلمة المرور." });
-    } catch {
-      setPwMsg({ ok: false, text: "تعذّر تحديث كلمة المرور. تأكد من صلاحيات المشرف العام." });
+    } catch (err) {
+      setPwMsg({ ok: false, text: failText(err, "تعذّر تحديث كلمة المرور") });
     }
     setPwBusy(false);
+  };
+
+  const updateEmail = async () => {
+    const value = newEmail.trim();
+    if (value === "" || value === row.email) return;
+    setEmailBusy(true);
+    setEmailMsg(null);
+    try {
+      await updateEmailFn({ data: { userId: row.id, email: value } });
+      setEmailMsg({ ok: true, text: "تم تحديث البريد الإلكتروني." });
+    } catch (err) {
+      setEmailMsg({ ok: false, text: failText(err, "تعذّر تحديث البريد الإلكتروني") });
+    }
+    setEmailBusy(false);
   };
 
 
@@ -400,6 +439,36 @@ function UserEditor({
         ) : (
           <p className="mt-2 text-xs text-muted-foreground">6 أحرف على الأقل.</p>
         )}
+      </fieldset>
+      <fieldset className="sm:col-span-3 rounded-2xl border border-border p-4">
+        <legend className="px-1 text-xs font-semibold text-muted-foreground">
+          تغيير البريد الإلكتروني لهذا المستخدم
+        </legend>
+        <div className="flex flex-wrap items-center gap-3">
+          <input
+            type="email"
+            dir="ltr"
+            className="field-input min-w-[16rem] flex-1"
+            value={newEmail}
+            onChange={(e) => {
+              setNewEmail(e.target.value);
+              setEmailMsg(null);
+            }}
+          />
+          <button
+            type="button"
+            className="btn-text"
+            disabled={emailBusy || newEmail.trim() === "" || newEmail.trim() === row.email}
+            onClick={() => void updateEmail()}
+          >
+            {emailBusy ? "جارٍ التحديث…" : "تحديث البريد"}
+          </button>
+        </div>
+        {emailMsg ? (
+          <p className={`mt-2 text-xs ${emailMsg.ok ? "text-muted-foreground" : "text-destructive"}`}>
+            {emailMsg.text}
+          </p>
+        ) : null}
       </fieldset>
 
       <div className="flex gap-2">
