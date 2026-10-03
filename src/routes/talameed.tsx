@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { UserRound } from "lucide-react";
 import { SpaceAuth, Wordmark } from "@/components/SpaceAuth";
 import { StudentResources } from "@/components/resources/StudentResources";
 import { StudentSubmissions } from "@/components/resources/StudentSubmissions";
 import { StudentAgenda } from "@/components/agenda/StudentAgenda";
+import { QuestionsSpace } from "@/components/questions/QuestionsSpace";
 import { NotificationsPanel } from "@/components/NotificationsPanel";
 import { useNotifications } from "@/components/resources/useSubmissions";
 import { STATUS_LABEL } from "@/lib/spaces";
@@ -26,7 +27,7 @@ export const Route = createFileRoute("/talameed")({
   component: Page,
 });
 
-type Tab = "resources" | "agenda" | "answers" | "notifications" | "account";
+type Tab = "resources" | "agenda" | "questions" | "answers" | "notifications" | "account";
 
 function Page() {
   return (
@@ -69,9 +70,29 @@ function StudentShell({
   const [tab, setTab] = useState<Tab>("resources");
   const notifications = useNotifications(client, userId);
 
+  const [className, setClassName] = useState<string | null>(null);
+  const [levelName, setLevelName] = useState<string | null>(null);
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      if (classId) {
+        const { data } = await client.from("classes").select("name").eq("id", classId).maybeSingle();
+        if (active) setClassName(data?.name ?? null);
+      }
+      if (levelId) {
+        const { data } = await client.from("levels").select("name").eq("id", levelId).maybeSingle();
+        if (active) setLevelName(data?.name ?? null);
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [client, classId, levelId]);
+
   const tabs: { key: Tab; label: string; badge?: number }[] = [
     { key: "resources", label: "الدروس والتمارين" },
     { key: "agenda", label: "المفكرة" },
+    { key: "questions", label: "الأسئلة والأجوبة" },
     { key: "answers", label: "أجوبتي" },
     { key: "notifications", label: "الإشعارات", badge: notifications.unread },
     { key: "account", label: "حسابي" },
@@ -119,6 +140,14 @@ function StudentShell({
           />
         ) : tab === "agenda" ? (
           <StudentAgenda client={client} classId={classId} studentId={userId} />
+        ) : tab === "questions" ? (
+          <QuestionsSpace
+            client={client}
+            userId={userId}
+            userName={name}
+            role="student"
+            classId={classId}
+          />
         ) : tab === "answers" ? (
           <StudentSubmissions client={client} studentId={userId} />
         ) : tab === "notifications" ? (
@@ -141,6 +170,14 @@ function StudentShell({
                 <dd className="font-semibold text-foreground" dir="ltr">
                   {email}
                 </dd>
+              </div>
+              <div className="flex justify-between gap-4">
+                <dt className="text-muted-foreground">القسم</dt>
+                <dd className="font-semibold text-foreground">{className ?? "—"}</dd>
+              </div>
+              <div className="flex justify-between gap-4">
+                <dt className="text-muted-foreground">المستوى</dt>
+                <dd className="font-semibold text-foreground">{levelName ?? "—"}</dd>
               </div>
               <div className="flex justify-between gap-4">
                 <dt className="text-muted-foreground">الحالة</dt>

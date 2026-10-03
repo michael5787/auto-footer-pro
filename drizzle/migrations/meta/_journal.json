@@ -22,6 +22,27 @@
       "when": 1788282663030,
       "tag": "0002_storage_policies",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1791018551626,
+      "tag": "0003_create_class_questions",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791018564702,
+      "tag": "0004_create_chapters",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1791018597286,
+      "tag": "0005_add_resources_class_id",
+      "breakpoints": true
     }
   ]
 }
