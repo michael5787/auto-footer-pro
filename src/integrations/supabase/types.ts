@@ -383,6 +383,7 @@ export type Database = {
         Row: {
           category: Database["public"]["Enums"]["resource_category"]
           chapter_id: string | null
+          class_id: string | null
           created_at: string
           description: string | null
           file_name: string
@@ -398,6 +399,7 @@ export type Database = {
         Insert: {
           category: Database["public"]["Enums"]["resource_category"]
           chapter_id?: string | null
+          class_id?: string | null
           created_at?: string
           description?: string | null
           file_name: string
@@ -413,6 +415,7 @@ export type Database = {
         Update: {
           category?: Database["public"]["Enums"]["resource_category"]
           chapter_id?: string | null
+          class_id?: string | null
           created_at?: string
           description?: string | null
           file_name?: string
@@ -431,6 +434,13 @@ export type Database = {
             columns: ["chapter_id"]
             isOneToOne: false
             referencedRelation: "chapters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "resources_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "classes"
             referencedColumns: ["id"]
           },
           {
