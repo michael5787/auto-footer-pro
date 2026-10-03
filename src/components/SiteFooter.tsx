@@ -4,6 +4,7 @@ const LINKS = [
   { to: "/", label: "الرئيسية" },
   { to: "/talameed", label: "فضاء التلاميذ" },
   { to: "/taleem", label: "فضاء التعليم" },
+  { to: "/admin", label: "فضاء الإدارة" },
 ] as const;
 
 function Wordmark() {
