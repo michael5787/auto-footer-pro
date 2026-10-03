@@ -43,6 +43,13 @@
       "when": 1791018597286,
       "tag": "0005_add_resources_class_id",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1791019070989,
+      "tag": "0006_profile_avatars",
+      "breakpoints": true
     }
   ]
 }
