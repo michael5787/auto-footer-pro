@@ -144,6 +144,85 @@ export type Database = {
           },
         ]
       }
+      evaluation_grades: {
+        Row: {
+          comment: string | null
+          created_at: string
+          evaluation_id: string
+          grade: number
+          id: string
+          student_id: string
+          teacher_id: string
+          updated_at: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          evaluation_id: string
+          grade: number
+          id?: string
+          student_id: string
+          teacher_id: string
+          updated_at?: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          evaluation_id?: string
+          grade?: number
+          id?: string
+          student_id?: string
+          teacher_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "evaluation_grades_evaluation_id_fkey"
+            columns: ["evaluation_id"]
+            isOneToOne: false
+            referencedRelation: "agenda_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      homework_status: {
+        Row: {
+          created_at: string
+          done: boolean
+          homework_id: string
+          id: string
+          student_id: string
+          teacher_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          done: boolean
+          homework_id: string
+          id?: string
+          student_id: string
+          teacher_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          done?: boolean
+          homework_id?: string
+          id?: string
+          student_id?: string
+          teacher_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "homework_status_homework_id_fkey"
+            columns: ["homework_id"]
+            isOneToOne: false
+            referencedRelation: "agenda_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       levels: {
         Row: {
           code: string | null
