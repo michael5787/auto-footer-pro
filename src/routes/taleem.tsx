@@ -8,10 +8,12 @@ import { TeacherResources } from "@/components/resources/TeacherResources";
 import { TeacherSubmissions } from "@/components/resources/TeacherSubmissions";
 import { TeacherAgenda } from "@/components/agenda/TeacherAgenda";
 import { QuestionsSpace } from "@/components/questions/QuestionsSpace";
+import { TeacherEvaluations } from "@/components/grades/Grades";
 import { ClassStudents } from "@/components/students/ClassStudents";
 import { NotificationsPanel } from "@/components/NotificationsPanel";
 import { useNotifications } from "@/components/resources/useSubmissions";
 import { STATUS_LABEL } from "@/lib/spaces";
+import { useSpaceSection } from "@/hooks/useSpaceSection";
 
 export const Route = createFileRoute("/taleem")({
   ssr: false,
@@ -28,7 +30,7 @@ export const Route = createFileRoute("/taleem")({
   component: Page,
 });
 
-type Tab = "resources" | "agenda" | "questions" | "answers" | "students" | "notifications" | "account";
+type Tab = "resources" | "agenda" | "evaluations" | "questions" | "answers" | "students" | "notifications" | "account";
 type ClassRow = Database["public"]["Tables"]["classes"]["Row"];
 
 function Page() {
@@ -66,7 +68,7 @@ function TeacherShell({
   signOut: () => Promise<void>;
   isAdmin: boolean;
 }) {
-  const [tab, setTab] = useState<Tab>("resources");
+  const [tab, setTab] = useSpaceSection<Tab>("taleem", userId, "resources", ["resources", "agenda", "evaluations", "questions", "answers", "students", "notifications", "account"]);
   const [classes, setClasses] = useState<ClassRow[]>([]);
   const notifications = useNotifications(client, userId);
 
@@ -98,6 +100,7 @@ function TeacherShell({
   const tabs: { key: Tab; label: string; badge?: number }[] = [
     { key: "resources", label: "الدروس والتمارين" },
     { key: "agenda", label: "المفكرة" },
+    { key: "evaluations", label: "التقييمات" },
     { key: "questions", label: "الأسئلة والأجوبة" },
     { key: "answers", label: "أجوبة التلاميذ" },
     { key: "students", label: "قائمة التلاميذ" },
@@ -140,6 +143,8 @@ function TeacherShell({
           <TeacherResources client={client} teacherId={userId} />
         ) : tab === "agenda" ? (
           <TeacherAgenda client={client} teacherId={userId} classes={classes} />
+            ) : tab === "evaluations" ? (
+          <TeacherEvaluations client={client} classes={classes} />
         ) : tab === "questions" ? (
           <QuestionsSpace
             client={client}
@@ -152,7 +157,7 @@ function TeacherShell({
         ) : tab === "answers" ? (
           <TeacherSubmissions client={client} teacherId={userId} classes={classes} />
         ) : tab === "students" ? (
-          <ClassStudents client={client} classes={classes} isAdmin={isAdmin} />
+         <ClassStudents client={client} classes={classes} isAdmin={isAdmin} teacherId={userId} />
         ) : tab === "notifications" ? (
           <NotificationsPanel
             rows={notifications.rows}

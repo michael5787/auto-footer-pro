@@ -8,7 +8,10 @@ import { StudentAgenda } from "@/components/agenda/StudentAgenda";
 import { QuestionsSpace } from "@/components/questions/QuestionsSpace";
 import { NotificationsPanel } from "@/components/NotificationsPanel";
 import { useNotifications } from "@/components/resources/useSubmissions";
+import { StudentGrades } from "@/components/grades/Grades";
+import { StudentTour, useTourEligible, type TourStep } from "@/components/StudentTour";
 import { STATUS_LABEL } from "@/lib/spaces";
+import { useSpaceSection } from "@/hooks/useSpaceSection";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 
@@ -27,7 +30,7 @@ export const Route = createFileRoute("/talameed")({
   component: Page,
 });
 
-type Tab = "resources" | "agenda" | "questions" | "answers" | "notifications" | "account";
+type Tab = "resources" | "agenda" | "grades" | "questions" | "answers" | "notifications" | "account";
 
 function Page() {
   return (
@@ -67,8 +70,18 @@ function StudentShell({
   classId: string | null;
   signOut: () => Promise<void>;
 }) {
-  const [tab, setTab] = useState<Tab>("resources");
+  const [tab, setTab, sectionReady] = useSpaceSection<Tab>("talameed", userId, "resources", ["resources", "agenda", "grades", "questions", "answers", "notifications", "account"]);
   const notifications = useNotifications(client, userId);
+  const tour = useTourEligible(userId);
+  const tourSteps: TourStep<Tab>[] = [
+    { key: "resources", title: "الدروس والتمارين", text: "هنا تجد دروس وتمارين قسمك مرتبة حسب المحاور، ويمكنك إرسال أجوبتك." },
+    { key: "agenda", title: "المفكرة", text: "تابع مواعيد الواجبات المنزلية والتقييمات التي يبرمجها أساتذتك." },
+    { key: "grades", title: "المراقبة المستمرة", text: "اطّلع على نقاطك وتقييماتك." },
+    { key: "questions", title: "الأسئلة والأجوبة", text: "اطرح سؤالك على أستاذ قسمك بملف، وشاهد أسئلة زملائك وأجوبة الأستاذ." },
+    { key: "answers", title: "أجوبتي", text: "راجع الأجوبة التي أرسلتها وتصحيحها." },
+    { key: "notifications", title: "الإشعارات", text: "تصلك هنا التنبيهات عند إضافة حدث جديد أو رد على سؤالك." },
+    { key: "account", title: "حسابي", text: "معلوماتك الشخصية، قسمك ومستواك، وزر تسجيل الخروج." },
+  ];
 
   const [className, setClassName] = useState<string | null>(null);
   const [levelName, setLevelName] = useState<string | null>(null);
@@ -92,6 +105,7 @@ function StudentShell({
   const tabs: { key: Tab; label: string; badge?: number }[] = [
     { key: "resources", label: "الدروس والتمارين" },
     { key: "agenda", label: "المفكرة" },
+    { key: "grades", label: "المراقبة المستمرة" },
     { key: "questions", label: "الأسئلة والأجوبة" },
     { key: "answers", label: "أجوبتي" },
     { key: "notifications", label: "الإشعارات", badge: notifications.unread },
@@ -110,6 +124,7 @@ function StudentShell({
                 key={t.key}
                 type="button"
                 className="nav-menu-item"
+                data-tour={t.key}
                 data-active={tab === t.key}
                 onClick={() => setTab(t.key)}
               >
@@ -128,6 +143,9 @@ function StudentShell({
         </div>
       </header>
 
+      {tour.eligible && sectionReady ? (
+        <StudentTour steps={tourSteps} initialStep={tab} onStep={setTab} onClose={tour.close} onDisable={tour.disable} />
+      ) : null}
       <main className="mx-auto w-full max-w-4xl px-4 py-10">
         {tab === "resources" ? (
           <StudentResources
@@ -140,6 +158,8 @@ function StudentShell({
           />
         ) : tab === "agenda" ? (
           <StudentAgenda client={client} classId={classId} studentId={userId} />
+            ) : tab === "grades" ? (
+          <StudentGrades client={client} classId={classId} studentId={userId} />
         ) : tab === "questions" ? (
           <QuestionsSpace
             client={client}
