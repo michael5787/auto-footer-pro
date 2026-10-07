@@ -4,6 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 import { CATEGORY_LABEL, useResourceList } from "@/components/resources/useResources";
 import { AgendaCalendar, formatDayLabelAr } from "./AgendaCalendar";
+import { LessonLog } from "./LessonLog";
 import { AgendaCard, useAgendaCounts, useAttachedResources } from "./agendaShared";
 import {
   AGENDA_KIND_LABEL,
@@ -155,7 +156,7 @@ export function TeacherAgenda({
     <section className="text-start">
       <div className="rounded-2xl border border-border bg-gradient-to-l from-brand-green/10 via-card to-brand-red/10 p-4">
         <h2 className="flex items-center gap-2 text-lg font-semibold text-foreground">
-          <CalendarPlus size={18} className="text-brand-green" /> المفكرة
+          <CalendarPlus size={18} className="text-brand-green" /> المذكرة
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
           برمج الواجبات والتقييمات ليوم {formatDayLabelAr(dateKey)} مع نص أو ملف مرفق.
@@ -166,6 +167,8 @@ export function TeacherAgenda({
       <div className="mt-4">
         <AgendaCalendar value={dateKey} onChange={navigate} counts={counts} />
       </div>
+
+      <LessonLog client={client} teacherId={teacherId} classes={classes} dateKey={dateKey} />
 
       <div className="mt-4">
         <select className="field-input" value={classId} onChange={(e) => setClassId(e.target.value)}>
@@ -224,7 +227,7 @@ export function TeacherAgenda({
         />
         <div className="flex gap-2 sm:col-span-2">
           <button type="submit" className="btn-primary" disabled={busy}>
-            {editing ? "حفظ التعديل" : "إضافة إلى المفكرة"}
+            {editing ? "حفظ التعديل" : "إضافة إلى المذكرة"}
           </button>
           {editing ? (
             <button type="button" className="btn-text" onClick={reset}>

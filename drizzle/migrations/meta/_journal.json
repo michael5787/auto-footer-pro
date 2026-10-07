@@ -57,6 +57,13 @@
       "when": 1791270026062,
       "tag": "0007_homework_status_and_grades",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1791355304581,
+      "tag": "0008_lesson_logs",
+      "breakpoints": true
     }
   ]
 }
