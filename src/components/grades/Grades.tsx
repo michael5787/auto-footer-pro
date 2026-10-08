@@ -49,6 +49,28 @@ export function TeacherEvaluations({ client, classes }: { client: Client; classe
   const [grades, setGrades] = useState<GradeRow[]>([]);
   const [names, setNames] = useState<Record<string, string>>({});
   const [open, setOpen] = useState<string | null>(null);
+  const [filterClass, setFilterClass] = useState("");
+  const [filterMonth, setFilterMonth] = useState("");
+  const [filterTrimester, setFilterTrimester] = useState("");
+
+  // Trimestres de l'année scolaire : T1 sept–nov, T2 déc–fév, T3 mars–mai (juin–août inclus dans T3)
+  const trimesterOf = (dateKey: string) => {
+    const m = Number(dateKey.slice(5, 7));
+    if (m >= 9 && m <= 11) return "1";
+    if (m === 12 || m <= 2) return "2";
+    return "3";
+  };
+
+  const filtered = useMemo(
+    () =>
+      rows.filter((r) => {
+        if (filterClass && r.class_id !== filterClass) return false;
+        if (filterMonth && r.event_date.slice(0, 7) !== filterMonth) return false;
+        if (filterTrimester && trimesterOf(r.event_date) !== filterTrimester) return false;
+        return true;
+      }),
+    [rows, filterClass, filterMonth, filterTrimester],
+  );
 
   useEffect(() => {
     if (rows.length === 0) {
