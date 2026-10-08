@@ -156,8 +156,7 @@ export function TeacherEvaluations({ client, classes }: { client: Client; classe
         <p className="mt-6 rounded-2xl border border-dashed border-border bg-card/60 px-6 py-10 text-center text-sm text-muted-foreground">
           لا توجد تقييمات بعد. أنشئ تقييماً من المذكرة.
         </p>
-      ) : (
-        filtered.length === 0 ? (
+      ) : filtered.length === 0 ? (
         <p className="mt-6 rounded-2xl border border-dashed border-border bg-card/60 px-6 py-10 text-center text-sm text-muted-foreground">
           لا توجد تقييمات مطابقة لهذه التصفية.
         </p>
