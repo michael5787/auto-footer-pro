@@ -3,6 +3,7 @@ import { ClipboardCheck, GraduationCap, Plus } from "lucide-react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 import { formatDayLabel, type AgendaRow } from "@/components/agenda/useAgenda";
+import { TRIMESTER_OPTIONS, trimesterOf } from "@/lib/trimesters";
 
 type Client = SupabaseClient<Database>;
 type ClassRow = Database["public"]["Tables"]["classes"]["Row"];
@@ -52,15 +53,6 @@ export function TeacherEvaluations({ client, classes }: { client: Client; classe
   const [filterClass, setFilterClass] = useState("");
   const [filterMonth, setFilterMonth] = useState("");
   const [filterTrimester, setFilterTrimester] = useState("");
-
-  // الثلاثيات: الأول من نهاية سبتمبر إلى ديسمبر، الثاني من جانفي إلى نهاية مارس،
-  // الثالث من أفريل إلى جوان (وما بعده من نفس السنة الدراسية يُحتسب في الثالث).
-  const trimesterOf = (dateKey: string) => {
-    const m = Number(dateKey.slice(5, 7));
-    if (m >= 9 && m <= 12) return "1";
-    if (m >= 1 && m <= 3) return "2";
-    return "3";
-  };
 
   const filtered = useMemo(
     () =>
@@ -145,9 +137,11 @@ export function TeacherEvaluations({ client, classes }: { client: Client; classe
             aria-label="تصفية حسب الثلاثي"
           >
             <option value="">كل الثلاثيات</option>
-            <option value="1">الثلاثي الأول (سبتمبر–ديسمبر)</option>
-            <option value="2">الثلاثي الثاني (جانفي–مارس)</option>
-            <option value="3">الثلاثي الثالث (أفريل–جوان)</option>
+            {TRIMESTER_OPTIONS.map((t) => (
+              <option key={t.value} value={t.value}>
+                {t.label}
+              </option>
+            ))}
           </select>
         </div>
       ) : null}
