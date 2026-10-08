@@ -109,6 +109,47 @@ export function TeacherEvaluations({ client, classes }: { client: Client; classe
       <p className="mt-1 text-sm text-muted-foreground">
         التقييمات المُنشأة من المذكرة. أضف النقط من قائمة التلاميذ.
       </p>
+      {!loading && rows.length > 0 ? (
+        <div className="mt-4 flex flex-wrap gap-2">
+          <select
+            className="field-input text-sm"
+            value={filterClass}
+            onChange={(e) => setFilterClass(e.target.value)}
+            aria-label="تصفية حسب القسم"
+          >
+            <option value="">كل الأقسام</option>
+            {classes.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+          <select
+            className="field-input text-sm"
+            value={filterMonth}
+            onChange={(e) => setFilterMonth(e.target.value)}
+            aria-label="تصفية حسب الشهر"
+          >
+            <option value="">كل الأشهر</option>
+            {Array.from(new Set(rows.map((r) => r.event_date.slice(0, 7)))).map((m) => (
+              <option key={m} value={m}>
+                {formatDayLabel(`${m}-01`)}
+              </option>
+            ))}
+          </select>
+          <select
+            className="field-input text-sm"
+            value={filterTrimester}
+            onChange={(e) => setFilterTrimester(e.target.value)}
+            aria-label="تصفية حسب الثلاثي"
+          >
+            <option value="">كل الثلاثيات</option>
+            <option value="1">الثلاثي الأول</option>
+            <option value="2">الثلاثي الثاني</option>
+            <option value="3">الثلاثي الثالث</option>
+          </select>
+        </div>
+      ) : null}
       {loading ? (
         <p className="mt-6 text-sm text-muted-foreground">جارٍ التحميل…</p>
       ) : rows.length === 0 ? (
