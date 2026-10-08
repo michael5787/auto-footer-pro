@@ -157,8 +157,13 @@ export function TeacherEvaluations({ client, classes }: { client: Client; classe
           لا توجد تقييمات بعد. أنشئ تقييماً من المذكرة.
         </p>
       ) : (
+        filtered.length === 0 ? (
+        <p className="mt-6 rounded-2xl border border-dashed border-border bg-card/60 px-6 py-10 text-center text-sm text-muted-foreground">
+          لا توجد تقييمات مطابقة لهذه التصفية.
+        </p>
+      ) : (
         <ul className="mt-6 space-y-3">
-          {rows.map((r) => {
+          {filtered.map((r) => {
             const g = grades.filter((x) => x.evaluation_id === r.id);
             const avg = g.length ? g.reduce((s, x) => s + Number(x.grade), 0) / g.length : null;
             return (
