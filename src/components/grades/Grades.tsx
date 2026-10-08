@@ -145,9 +145,9 @@ export function TeacherEvaluations({ client, classes }: { client: Client; classe
             aria-label="تصفية حسب الثلاثي"
           >
             <option value="">كل الثلاثيات</option>
-            <option value="1">الثلاثي الأول</option>
-            <option value="2">الثلاثي الثاني</option>
-            <option value="3">الثلاثي الثالث</option>
+            <option value="1">الثلاثي الأول (سبتمبر–ديسمبر)</option>
+            <option value="2">الثلاثي الثاني (جانفي–مارس)</option>
+            <option value="3">الثلاثي الثالث (أفريل–جوان)</option>
           </select>
         </div>
       ) : null}
