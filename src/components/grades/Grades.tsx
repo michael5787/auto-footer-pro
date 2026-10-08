@@ -49,6 +49,28 @@ export function TeacherEvaluations({ client, classes }: { client: Client; classe
   const [grades, setGrades] = useState<GradeRow[]>([]);
   const [names, setNames] = useState<Record<string, string>>({});
   const [open, setOpen] = useState<string | null>(null);
+  const [filterClass, setFilterClass] = useState("");
+  const [filterMonth, setFilterMonth] = useState("");
+  const [filterTrimester, setFilterTrimester] = useState("");
+
+  // Trimestres de l'année scolaire : T1 sept–nov, T2 déc–fév, T3 mars–mai (juin–août inclus dans T3)
+  const trimesterOf = (dateKey: string) => {
+    const m = Number(dateKey.slice(5, 7));
+    if (m >= 9 && m <= 11) return "1";
+    if (m === 12 || m <= 2) return "2";
+    return "3";
+  };
+
+  const filtered = useMemo(
+    () =>
+      rows.filter((r) => {
+        if (filterClass && r.class_id !== filterClass) return false;
+        if (filterMonth && r.event_date.slice(0, 7) !== filterMonth) return false;
+        if (filterTrimester && trimesterOf(r.event_date) !== filterTrimester) return false;
+        return true;
+      }),
+    [rows, filterClass, filterMonth, filterTrimester],
+  );
 
   useEffect(() => {
     if (rows.length === 0) {
@@ -87,15 +109,60 @@ export function TeacherEvaluations({ client, classes }: { client: Client; classe
       <p className="mt-1 text-sm text-muted-foreground">
         التقييمات المُنشأة من المذكرة. أضف النقط من قائمة التلاميذ.
       </p>
+      {!loading && rows.length > 0 ? (
+        <div className="mt-4 flex flex-wrap gap-2">
+          <select
+            className="field-input text-sm"
+            value={filterClass}
+            onChange={(e) => setFilterClass(e.target.value)}
+            aria-label="تصفية حسب القسم"
+          >
+            <option value="">كل الأقسام</option>
+            {classes.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+          <select
+            className="field-input text-sm"
+            value={filterMonth}
+            onChange={(e) => setFilterMonth(e.target.value)}
+            aria-label="تصفية حسب الشهر"
+          >
+            <option value="">كل الأشهر</option>
+            {Array.from(new Set(rows.map((r) => r.event_date.slice(0, 7)))).map((m) => (
+              <option key={m} value={m}>
+                {formatDayLabel(`${m}-01`)}
+              </option>
+            ))}
+          </select>
+          <select
+            className="field-input text-sm"
+            value={filterTrimester}
+            onChange={(e) => setFilterTrimester(e.target.value)}
+            aria-label="تصفية حسب الثلاثي"
+          >
+            <option value="">كل الثلاثيات</option>
+            <option value="1">الثلاثي الأول</option>
+            <option value="2">الثلاثي الثاني</option>
+            <option value="3">الثلاثي الثالث</option>
+          </select>
+        </div>
+      ) : null}
       {loading ? (
         <p className="mt-6 text-sm text-muted-foreground">جارٍ التحميل…</p>
       ) : rows.length === 0 ? (
         <p className="mt-6 rounded-2xl border border-dashed border-border bg-card/60 px-6 py-10 text-center text-sm text-muted-foreground">
           لا توجد تقييمات بعد. أنشئ تقييماً من المذكرة.
         </p>
+      ) : filtered.length === 0 ? (
+        <p className="mt-6 rounded-2xl border border-dashed border-border bg-card/60 px-6 py-10 text-center text-sm text-muted-foreground">
+          لا توجد تقييمات مطابقة لهذه التصفية.
+        </p>
       ) : (
         <ul className="mt-6 space-y-3">
-          {rows.map((r) => {
+          {filtered.map((r) => {
             const g = grades.filter((x) => x.evaluation_id === r.id);
             const avg = g.length ? g.reduce((s, x) => s + Number(x.grade), 0) / g.length : null;
             return (
