@@ -44,26 +44,22 @@ export function useEvaluations(client: Client, classIds: string[], version = 0) 
 
 /* ------------------------------ Teacher side ------------------------------ */
 
-export function TeacherEvaluations({ client, classes }: { client: Client; classes: ClassRow[] }) {
+export function TeacherEvaluations({
+  client,
+  classes,
+  filter,
+}: {
+  client: Client;
+  classes: ClassRow[];
+  filter: AgendaFilter;
+}) {
   const classIds = useMemo(() => classes.map((c) => c.id), [classes]);
   const { rows, loading } = useEvaluations(client, classIds);
   const [grades, setGrades] = useState<GradeRow[]>([]);
   const [names, setNames] = useState<Record<string, string>>({});
   const [open, setOpen] = useState<string | null>(null);
-  const [filterClass, setFilterClass] = useState("");
-  const [filterMonth, setFilterMonth] = useState("");
-  const [filterTrimester, setFilterTrimester] = useState("");
 
-  const filtered = useMemo(
-    () =>
-      rows.filter((r) => {
-        if (filterClass && r.class_id !== filterClass) return false;
-        if (filterMonth && r.event_date.slice(0, 7) !== filterMonth) return false;
-        if (filterTrimester && trimesterOf(r.event_date) !== filterTrimester) return false;
-        return true;
-      }),
-    [rows, filterClass, filterMonth, filterTrimester],
-  );
+  const filtered = useMemo(() => applyAgendaFilter(rows, filter), [rows, filter]);
 
   useEffect(() => {
     if (rows.length === 0) {
