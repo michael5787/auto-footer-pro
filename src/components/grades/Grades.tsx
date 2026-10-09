@@ -3,7 +3,7 @@ import { ClipboardCheck, GraduationCap, Plus } from "lucide-react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 import { formatDayLabel, type AgendaRow } from "@/components/agenda/useAgenda";
-import { TRIMESTER_OPTIONS, trimesterOf } from "@/lib/trimesters";
+import { applyAgendaFilter, type AgendaFilter } from "@/components/grades/AgendaFilters";
 
 type Client = SupabaseClient<Database>;
 type ClassRow = Database["public"]["Tables"]["classes"]["Row"];
