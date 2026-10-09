@@ -35,6 +35,22 @@ export const Route = createFileRoute("/taleem")({
 type Tab = "resources" | "agenda" | "evaluations" | "questions" | "answers" | "students" | "notifications" | "account";
 type ClassRow = Database["public"]["Tables"]["classes"]["Row"];
 
+/** Rubrique المراقبة المستمرة : une seule barre de filtres pour évaluations et devoirs. */
+function EvaluationsTab({ client, classes }: { client: SupabaseClient<Database>; classes: ClassRow[] }) {
+  const [filter, setFilter] = useState<AgendaFilter>(EMPTY_FILTER);
+  const classIds = useMemo(() => classes.map((c) => c.id), [classes]);
+  const months = useAgendaMonths(client, classIds);
+  return (
+    <div className="space-y-6">
+      {months.length > 0 ? (
+        <AgendaFilterBar classes={classes} months={months} filter={filter} onChange={setFilter} />
+      ) : null}
+      <TeacherEvaluations client={client} classes={classes} filter={filter} />
+      <TeacherHomeworks client={client} classes={classes} filter={filter} />
+    </div>
+  );
+}
+
 function Page() {
   return (
     <SpaceAuth space="taleem">
