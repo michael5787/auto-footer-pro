@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { UserRound } from "lucide-react";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -10,6 +10,7 @@ import { TeacherAgenda } from "@/components/agenda/TeacherAgenda";
 import { QuestionsSpace } from "@/components/questions/QuestionsSpace";
 import { TeacherEvaluations } from "@/components/grades/Grades";
 import { TeacherHomeworks } from "@/components/grades/Homework";
+import { AgendaFilterBar, EMPTY_FILTER, useAgendaMonths, type AgendaFilter } from "@/components/grades/AgendaFilters";
 import { ClassStudents } from "@/components/students/ClassStudents";
 import { NotificationsPanel } from "@/components/NotificationsPanel";
 import { useNotifications } from "@/components/resources/useSubmissions";
