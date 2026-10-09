@@ -196,9 +196,13 @@ export function TeacherHomeworks({
         <p className="mt-6 rounded-2xl border border-dashed border-border bg-card/60 px-6 py-10 text-center text-sm text-muted-foreground">
           لا توجد واجبات منزلية بعد.
         </p>
+      ) : filtered.length === 0 ? (
+        <p className="mt-6 rounded-2xl border border-dashed border-border bg-card/60 px-6 py-10 text-center text-sm text-muted-foreground">
+          لا توجد واجبات مطابقة لهذه التصفية.
+        </p>
       ) : (
         <ul className="mt-6 space-y-3">
-          {rows.map((r) => {
+          {filtered.map((r) => {
             const s = status.filter((x) => x.homework_id === r.id);
             const doneCount = s.filter((x) => x.done).length;
             return (
