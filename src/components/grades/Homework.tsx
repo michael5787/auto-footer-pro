@@ -3,6 +3,7 @@ import { BookCheck, ListChecks } from "lucide-react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 import { formatDayLabel, type AgendaRow } from "@/components/agenda/useAgenda";
+import { applyAgendaFilter, type AgendaFilter } from "@/components/grades/AgendaFilters";
 
 type Client = SupabaseClient<Database>;
 type ClassRow = Database["public"]["Tables"]["classes"]["Row"];
@@ -144,9 +145,18 @@ export function HomeworkStatusButton({
 
 /* ---------------- Teacher: summary (المراقبة المستمرة) ---------------- */
 
-export function TeacherHomeworks({ client, classes }: { client: Client; classes: ClassRow[] }) {
+export function TeacherHomeworks({
+  client,
+  classes,
+  filter,
+}: {
+  client: Client;
+  classes: ClassRow[];
+  filter: AgendaFilter;
+}) {
   const classIds = useMemo(() => classes.map((c) => c.id), [classes]);
   const { rows, loading } = useHomeworks(client, classIds);
+  const filtered = useMemo(() => applyAgendaFilter(rows, filter), [rows, filter]);
   const [status, setStatus] = useState<StatusRow[]>([]);
   const [names, setNames] = useState<Record<string, string>>({});
   const [open, setOpen] = useState<string | null>(null);
@@ -186,9 +196,13 @@ export function TeacherHomeworks({ client, classes }: { client: Client; classes:
         <p className="mt-6 rounded-2xl border border-dashed border-border bg-card/60 px-6 py-10 text-center text-sm text-muted-foreground">
           لا توجد واجبات منزلية بعد.
         </p>
+      ) : filtered.length === 0 ? (
+        <p className="mt-6 rounded-2xl border border-dashed border-border bg-card/60 px-6 py-10 text-center text-sm text-muted-foreground">
+          لا توجد واجبات مطابقة لهذه التصفية.
+        </p>
       ) : (
         <ul className="mt-6 space-y-3">
-          {rows.map((r) => {
+          {filtered.map((r) => {
             const s = status.filter((x) => x.homework_id === r.id);
             const doneCount = s.filter((x) => x.done).length;
             return (

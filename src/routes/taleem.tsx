@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { UserRound } from "lucide-react";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -10,6 +10,7 @@ import { TeacherAgenda } from "@/components/agenda/TeacherAgenda";
 import { QuestionsSpace } from "@/components/questions/QuestionsSpace";
 import { TeacherEvaluations } from "@/components/grades/Grades";
 import { TeacherHomeworks } from "@/components/grades/Homework";
+import { AgendaFilterBar, EMPTY_FILTER, useAgendaMonths, type AgendaFilter } from "@/components/grades/AgendaFilters";
 import { ClassStudents } from "@/components/students/ClassStudents";
 import { NotificationsPanel } from "@/components/NotificationsPanel";
 import { useNotifications } from "@/components/resources/useSubmissions";
@@ -33,6 +34,22 @@ export const Route = createFileRoute("/taleem")({
 
 type Tab = "resources" | "agenda" | "evaluations" | "questions" | "answers" | "students" | "notifications" | "account";
 type ClassRow = Database["public"]["Tables"]["classes"]["Row"];
+
+/** Rubrique المراقبة المستمرة : une seule barre de filtres pour évaluations et devoirs. */
+function EvaluationsTab({ client, classes }: { client: SupabaseClient<Database>; classes: ClassRow[] }) {
+  const [filter, setFilter] = useState<AgendaFilter>(EMPTY_FILTER);
+  const classIds = useMemo(() => classes.map((c) => c.id), [classes]);
+  const months = useAgendaMonths(client, classIds);
+  return (
+    <div className="space-y-6">
+      {months.length > 0 ? (
+        <AgendaFilterBar classes={classes} months={months} filter={filter} onChange={setFilter} />
+      ) : null}
+      <TeacherEvaluations client={client} classes={classes} filter={filter} />
+      <TeacherHomeworks client={client} classes={classes} filter={filter} />
+    </div>
+  );
+}
 
 function Page() {
   return (
@@ -145,10 +162,7 @@ function TeacherShell({
         ) : tab === "agenda" ? (
           <TeacherAgenda client={client} teacherId={userId} classes={classes} />
             ) : tab === "evaluations" ? (
-          <div className="space-y-6">
-            <TeacherEvaluations client={client} classes={classes} />
-            <TeacherHomeworks client={client} classes={classes} />
-          </div>
+          <EvaluationsTab client={client} classes={classes} />
         ) : tab === "questions" ? (
           <QuestionsSpace
             client={client}
