@@ -146,10 +146,7 @@ function TeacherShell({
         ) : tab === "agenda" ? (
           <TeacherAgenda client={client} teacherId={userId} classes={classes} />
             ) : tab === "evaluations" ? (
-          <div className="space-y-6">
-            <TeacherEvaluations client={client} classes={classes} />
-            <TeacherHomeworks client={client} classes={classes} />
-          </div>
+          <EvaluationsTab client={client} classes={classes} />
         ) : tab === "questions" ? (
           <QuestionsSpace
             client={client}
