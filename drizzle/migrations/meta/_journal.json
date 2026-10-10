@@ -71,6 +71,13 @@
       "when": 1791491012852,
       "tag": "0009_school_settings",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1791622787611,
+      "tag": "0010_absences_behavior_grades_undated_agenda",
+      "breakpoints": true
     }
   ]
 }
